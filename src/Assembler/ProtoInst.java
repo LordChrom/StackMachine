@@ -9,15 +9,14 @@ public class ProtoInst {
     public static final ProtoInst Comment = new ProtoInst();
 
     static {
-        Comment.includeInProgram = false;
+        Comment.type=ProtoInstructionType.Comment;
     }
 
     public Instruction inst;
 
-    public boolean isRename;
-    boolean includeInProgram = true;
+    public ProtoInstructionType type = ProtoInstructionType.Normal;
     public String[] renamings;
 
     public OperandInfo a = NoOperand,b = NoOperand;
-    String outputName = null;
+    String outputName, labelName;
 }
