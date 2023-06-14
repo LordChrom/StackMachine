@@ -30,10 +30,12 @@ public class Parser {
         opcodes.put("sba",new OpCodeInfo((a,b,p)->b-a,2,true));
         opcodes.put("eat",new OpCodeInfo((a,b,p)->0  ,1,false));
         opcodes.put("mov",new OpCodeInfo((a,b,p)->a  ,1,true));
-
         opcodes.put("nop",new OpCodeInfo((a,b,p)->0  ,0,false));
+
         opcodes.put("imm", immInfo);
         opcodes.put("limm", labelImmInfo);
+        opcodes.put("renamestack", renameInfo);
+        opcodes.put("label", labelInfo);
 
         opcodes.put("halt",new OpCodeInfo((a,b,p)->{
             p.running=false;
@@ -73,15 +75,17 @@ public class Parser {
             p.RAM[0xFF&a]=(byte)b;
             return 0;
         },2,false));
+    }
+    public static Instruction[] parseFile(String path) { return convertProgram(parseFileProto(path)); }
 
-        opcodes.put("renamestack", renameInfo);
-        opcodes.put("label", labelInfo);
-
-//        opcodes.put("",new OpCodeInfo((a,b,p)->,2,true));
-
+    public static Instruction[] convertProgram(ProtoInst[] prog) {
+        Instruction[] r = new Instruction[prog.length];
+        for (int i = 0; i < prog.length; i++)
+            r[i]=prog[i].inst;
+        return r;
     }
 
-    public static Instruction[] parseFile(String path) {
+    public static ProtoInst[] parseFileProto(String path) {
         File file = new File(path);
 
         ArrayList<ProtoInst> prog = new ArrayList<>();
@@ -92,8 +96,7 @@ public class Parser {
                     prog.add(p);
             }
         }catch (Exception e){
-            e.printStackTrace();
-            return new Instruction[0];
+            throw new RuntimeException(e);
         }
 
         HashMap<String,Integer> nameLocations = new HashMap<>();
@@ -181,10 +184,7 @@ public class Parser {
 
 
         prog.removeIf(p -> p.type!=ProtoInstructionType.Normal);
-        Instruction[] r = new Instruction[prog.size()];
-        for (int i = 0; i < prog.size(); i++)
-            r[i]=prog.get(i).inst;
-        return r;
+        return prog.toArray(new ProtoInst[0]);
     }
 
     public static ProtoInst parseLine(String line){
@@ -254,8 +254,8 @@ public class Parser {
             r.labelName=segments[1];
         }
 
-        i.opName = "["+segments[0]+"]";
-        i.label = (r.outputName==null)? i.opName :r.outputName;
+        i.opcode = segments[0];
+        i.label = (r.outputName==null)? i.opcode :r.outputName;
         return r;
     }
 

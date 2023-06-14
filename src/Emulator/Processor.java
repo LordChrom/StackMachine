@@ -68,7 +68,7 @@ public class Processor {
 
 
     public String toString(){
-        return "PC: \t"+ (0xFF&PC) +"\nInst:\t" +ROM[0xFF&PC].opName+"\n=============================\n\n"+showStack();
+        return "PC: \t"+ (0xFF&PC) +"\nInst:\t" +ROM[0xFF&PC].opcode +"\n=============================\n\n"+showStack();
     }
     public String showStack(){
         StringBuilder b = new StringBuilder();

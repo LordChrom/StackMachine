@@ -3,11 +3,12 @@ package Emulator;
 public class Instruction{
     public static final Instruction NOP = new Instruction(0,false,0,false,(a,b,p)->0,false);
 
+    public String label = "unknown";
 
     public int a,b;
     public boolean delA,delB, output;
     public Operation op;
-    public String opName;
+    public String opcode;
 
     public Instruction(){}
 
@@ -20,10 +21,4 @@ public class Instruction{
         this.op = op;
     }
 
-    public String label = "unknown";
-
-//    public String toString(){
-//        String ret = Datum.debugLabels.get(this);
-//        return ret;
-//    }
 }

@@ -1,9 +1,12 @@
 import Assembler.Parser;
+import Assembler.ProtoInst;
 import Emulator.Instruction;
 import Emulator.Processor;
 
 import java.io.FileWriter;
 import java.io.IOException;
+
+import static Assembler.Parser.NoOperand;
 
 public class Main {
     public static boolean debugMode = false;
@@ -12,23 +15,36 @@ public class Main {
         if(args.length>0)
             debugMode =args[0].equals("debug");
 
-        Instruction[] program;
-        if(debugMode)
-            program = Parser.parseFile("C:\\Users\\Slime\\Documents\\Projects\\Stackinator\\program.txt");
-        else
-            program = Parser.parseFile("program.txt");
+        ProtoInst[] protogram = Parser.parseFileProto(
+                (debugMode?"C:\\Users\\Slime\\Documents\\Projects\\Stackinator\\":"")+"program.txt"
+        );
+
+        String[] lowerLevelLines = new String[protogram.length];
+        for (int i = 0; i < protogram.length; i++) {
+            ProtoInst p = protogram[i];
+            String str = p.inst.opcode;
+            if(str.equals("limm")) str = "imm";
+
+            if(str.equals("imm"))
+                str+=" "+p.inst.op.exec(0,0,null); //gets imm value
+
+            if(p.a!=NoOperand)
+                str+=(p.inst.delA?" -":" ")+ p.inst.a;
+            if(p.b!=NoOperand)
+                str+=(p.inst.delB?" -":" ")+ p.inst.b;
+            lowerLevelLines[i]=str;
+        }
+        filePrint("lessAbstracted.txt",lowerLevelLines);
+
+        Instruction[] program = Parser.convertProgram(protogram);
 
         Processor p = new Processor();
         p.exec(program,debugMode);
-        System.out.println("\n\nFinal Stack State\n------\n"+p.showStack());
         filePrint("output.txt",p.outputLog.toString());
-//        p.printStack();
     }
 
 
     private static void filePrint(String name, String... fileLines){
-//        if(debug)
-//            name = "C:\\Users\\Slime\\Documents\\Projects\\Stackinator\\"+name;
         try (FileWriter writer = new FileWriter(name)) {
             for (int i = 0; i < fileLines.length; i++) {
                 writer.write(fileLines[i]);
@@ -38,6 +54,5 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
